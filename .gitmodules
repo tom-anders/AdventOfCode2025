@@ -1,0 +1,3 @@
+[submodule "aoc_lib"]
+	path = aoc_lib
+	url = git@github.com:tom-anders/AdventOfCodeLib.git

@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "aoc_lib/aoc_derive",
+    "aoc_lib/utils",
+]
+
+[workspace.dependencies]
+derive_more = {version = "2.0.1", features = ["full"]}
+itertools = "0.13.0"
+ndarray = "0.16.1"
+num = "0.4"
+parse-display = "0.10.0"
+priority-queue = "2.1"
+rayon = "1.10"
+regex = {version = "1.11", features = ["pattern"]}
+lazy-regex = "3.3.0"
+pretty_assertions = "1.4.0"
+dot-writer="0.1.3"
