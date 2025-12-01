@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "aoc_lib/aoc_derive",
-    "aoc_lib/utils",
+    "aoc_lib/utils", "day1",
 ]
 
 [workspace.dependencies]
