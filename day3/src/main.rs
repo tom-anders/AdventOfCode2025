@@ -2,48 +2,39 @@ use aoc_derive::aoc_main;
 use itertools::Itertools;
 use utils::*;
 
-fn find_best(numbers: &[usize], cur: usize, depth: u32, max: usize) -> Option<usize> {
-    if depth == 12 {
-        return Some(cur);
-    }
+fn find_joltage(bank: &[usize], num_digits: usize) -> usize {
+    bank.iter()
+        .enumerate()
+        .fold(Vec::with_capacity(num_digits), |mut stack, (pos, &battery)| {
+            let remaining = bank.len() - pos - 1;
 
-    if numbers.is_empty() || cur + 10_usize.pow(12 - depth) < max {
-        return None;
-    }
-
-    let skip_result = find_best(&numbers[1..], cur, depth, max);
-
-    let no_skip_result = find_best(
-        &numbers[1..],
-        cur + 10_usize.pow(12 - depth - 1) * numbers[0],
-        depth + 1,
-        skip_result.unwrap_or(max),
-    );
-
-    skip_result.max(no_skip_result)
+            while let Some(&back) = stack.last()
+                && battery > back
+                && stack.len() + remaining >= num_digits
+            {
+                stack.pop();
+            }
+            if stack.len() < num_digits {
+                stack.push(battery);
+            }
+            stack
+        })
+        .into_iter()
+        .rev()
+        .enumerate()
+        .fold(0, |acc, (i, n)| acc + n * 10_usize.pow(i as u32))
 }
 
 #[aoc_main]
 fn solve(input: Input) -> impl Into<Solution> {
     let banks = input
         .lines()
-        .map(|line| line.chars().map(|c| c.to_digit(10).unwrap() as usize).collect_vec())
-        .collect_vec();
+        .map(|line| line.chars().map(|c| c.to_digit(10).unwrap() as usize).collect_vec());
 
-    let part1 = banks
-        .iter()
-        .map(|bank| {
-            bank.iter()
-                .enumerate()
-                .flat_map(|(i, n1)| bank.iter().skip(i + 1).map(move |n2| 10 * n1 + n2))
-                .max()
-                .unwrap()
-        })
-        .sum_usize();
-
-    let part2 = banks.iter().map(|bank| find_best(bank, 0, 0, 0).unwrap()).sum_usize();
-
-    (part1, part2)
+    (
+        banks.clone().map(|bank| find_joltage(&bank, 2)).sum_usize(),
+        banks.map(|bank| find_joltage(&bank, 12)).sum_usize(),
+    )
 }
 
 #[cfg(test)]
@@ -52,6 +43,7 @@ mod tests {
     #[test]
     fn test_examples() {
         use utils::assert_example;
+
         assert_example!(
             r#"987654321111111
 811111111111119
