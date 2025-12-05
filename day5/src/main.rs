@@ -1,27 +1,37 @@
 use std::ops::RangeInclusive;
 
 use aoc_derive::aoc_main;
-use itertools::Itertools;
+use itertools::{FoldWhile, Itertools};
 use utils::*;
 
-fn part2(mut ranges: Vec<RangeInclusive<usize>>) -> usize {
-    ranges.sort_by_key(|r| *r.start());
-    loop {
-        let prev = ranges.len();
-        let mut i = 0;
-        while i < ranges.len() - 1 {
-            if ranges[i].end() >= ranges[i + 1].start() {
-                ranges[i] = *ranges[i].start()..=(*ranges[i + 1].end().max(ranges[i].end()));
-                ranges.remove(i + 1);
-            } else {
-                i += 1;
-            }
-        }
+fn part2(ranges: &[RangeInclusive<usize>]) -> usize {
+    std::iter::repeat(())
+        .fold_while(
+            ranges.iter().cloned().sorted_by_key(|r| *r.start()).collect_vec(),
+            |mut ranges, _| {
+                let prev = ranges.len();
+                let mut i = 0;
+                while i < ranges.len() - 1 {
+                    if ranges[i].end() >= ranges[i + 1].start() {
+                        ranges[i] =
+                            *ranges[i].start()..=(*ranges[i + 1].end().max(ranges[i].end()));
+                        ranges.remove(i + 1);
+                    } else {
+                        i += 1;
+                    }
+                }
 
-        if ranges.len() == prev {
-            return ranges.iter().map(|range| range.try_len().unwrap()).sum();
-        }
-    }
+                if ranges.len() < prev {
+                    FoldWhile::Continue(ranges)
+                } else {
+                    FoldWhile::Done(ranges)
+                }
+            },
+        )
+        .into_inner()
+        .iter()
+        .map(|range| range.try_len().unwrap())
+        .sum()
 }
 
 #[aoc_main]
@@ -36,7 +46,7 @@ fn solve(input: Input) -> impl Into<Solution> {
         .collect_vec();
     let ingredients = ingredients.lines().map(|line| line.parse::<usize>().unwrap()).collect_vec();
 
-    (ingredients.iter().filter(|i| ranges.iter().any(|r| r.contains(i))).count(), part2(ranges))
+    (ingredients.iter().filter(|i| ranges.iter().any(|r| r.contains(i))).count(), part2(&ranges))
 }
 
 #[cfg(test)]
