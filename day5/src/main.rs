@@ -1,37 +1,23 @@
 use std::ops::RangeInclusive;
 
 use aoc_derive::aoc_main;
-use itertools::{FoldWhile, Itertools};
+use itertools::Itertools;
 use utils::*;
 
 fn part2(ranges: &[RangeInclusive<usize>]) -> usize {
-    std::iter::repeat(())
-        .fold_while(
-            ranges.iter().cloned().sorted_by_key(|r| *r.start()).collect_vec(),
-            |mut ranges, _| {
-                let prev = ranges.len();
-                let mut i = 0;
-                while i < ranges.len() - 1 {
-                    if ranges[i].end() >= ranges[i + 1].start() {
-                        ranges[i] =
-                            *ranges[i].start()..=(*ranges[i + 1].end().max(ranges[i].end()));
-                        ranges.remove(i + 1);
-                    } else {
-                        i += 1;
-                    }
-                }
-
-                if ranges.len() < prev {
-                    FoldWhile::Continue(ranges)
-                } else {
-                    FoldWhile::Done(ranges)
-                }
-            },
-        )
-        .into_inner()
+    let ranges = ranges.iter().cloned().sorted_by_key(|r| *r.start()).collect_vec();
+    ranges
         .iter()
-        .map(|range| range.try_len().unwrap())
-        .sum()
+        // Add an empty range at the end to make sure we add the last one to the counter
+        .chain(std::iter::once(&(usize::MAX..=usize::MAX)))
+        .fold((0, ranges.first().unwrap().clone()), |(count, curr), next| {
+            if next.start() <= curr.end() {
+                (count, *curr.start()..=*curr.end().max(next.end()))
+            } else {
+                (count + curr.try_len().unwrap(), next.clone())
+            }
+        })
+        .0
 }
 
 #[aoc_main]
