@@ -2,13 +2,13 @@
 resolver = "2"
 members = [
     "aoc_lib/aoc_derive",
-    "aoc_lib/utils", "day1", "day2", "day3", "day4", "day5", "day6", "day7", "day8", "day9",
+    "aoc_lib/utils", "day1", "day10", "day2", "day3", "day4", "day5", "day6", "day7", "day8", "day9",
 ]
 
 [workspace.dependencies]
 derive_more = {version = "2.0.1", features = ["full"]}
 itertools = "0.13.0"
-ndarray = "0.16.1"
+ndarray = "0.17.1"
 num = "0.4"
 parse-display = "0.10.0"
 priority-queue = "2.1"
